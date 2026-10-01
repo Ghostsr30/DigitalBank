@@ -25,8 +25,12 @@ public class Transaction {
 
     private BigDecimal amount;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_account_transaction")
     private Account sourceAccount;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_account_transaction")
     private Account targetAccount;
 
     private LocalDate createdAt;
