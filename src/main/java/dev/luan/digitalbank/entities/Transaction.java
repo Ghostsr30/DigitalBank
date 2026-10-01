@@ -1,4 +1,4 @@
-package dev.luan.digitalbank.Entity;
+package dev.luan.digitalbank.entities;
 
 import dev.luan.digitalbank.domain.TransactionType;
 import jakarta.persistence.*;
