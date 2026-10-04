@@ -19,4 +19,5 @@ public class AccountDTO {
     private String holderName;
     private BigDecimal balance;
     private AccountStatus status;
+    private String document;
 }
