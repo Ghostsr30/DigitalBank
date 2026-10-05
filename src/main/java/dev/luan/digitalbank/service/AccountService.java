@@ -12,12 +12,14 @@ import java.util.Optional;
 
 @Service
 public class AccountService {
-
     private final AccountRepository accountRepository;
+    private final TransactionService transactionService;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, TransactionService transactionService) {
         this.accountRepository = accountRepository;
+        this.transactionService = transactionService;
     }
+
 
     private AccountDTO toDTO(Account account) {
         return new AccountDTO(
@@ -40,14 +42,7 @@ public class AccountService {
 
         Account savedAccount = accountRepository.save(account);
 
-        return new AccountDTO(
-            savedAccount.getId(),
-            savedAccount.getAccountNumber(),
-            savedAccount.getHolderName(),
-            savedAccount.getBalance(),
-            savedAccount.getStatus(),
-            savedAccount.getDocument()
-        );
+        return toDTO(savedAccount);
     }
 
     public AccountDTO findById(Long id) {
@@ -61,14 +56,21 @@ public class AccountService {
 
     public AccountDTO block(Long id){
         Account account = findEntityById(id);
-        account.setStatus(AccountStatus.BLOCKED);
+        account.setStatus(AccountStatus.BLOCKED);                //arrumar
 
         return toDTO(accountRepository.save(account));
     }
 
     public AccountDTO unblock(Long id){
         Account account = findEntityById(id);
-        account.setStatus(AccountStatus.ACTIVE);
+        account.setStatus(AccountStatus.ACTIVE);         //arrumar
+
+        return toDTO(accountRepository.save(account));
+    }
+
+    public AccountDTO closed(Long id){
+        Account account = findEntityById(id);
+        account.setStatus(AccountStatus.CLOSED);                //arrumar
 
         return toDTO(accountRepository.save(account));
     }
@@ -86,7 +88,11 @@ public class AccountService {
             throw new RuntimeException("Account is blocked");
         }
         account.setBalance(account.getBalance().add(amount));
+
+        transactionService.registerDeposit(amount, account);
+
         return toDTO(accountRepository.save(account));
+
     }
 
     @Transactional
@@ -106,6 +112,9 @@ public class AccountService {
             throw new RuntimeException("Insufficient balance");
         }
         account.setBalance(account.getBalance().subtract(amount));
+
+        transactionService.registerWithdrawal(id, amount, account);
+
         return toDTO(accountRepository.save(account));
     }
 }

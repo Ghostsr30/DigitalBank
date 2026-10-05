@@ -19,6 +19,6 @@ public class TransactionDTO {
     private TransactionType type;
     private BigDecimal amount;
     private LocalDate createdAt;
-    private AccountDTO sourceAccount;
-    private AccountDTO targetAccount;
+    private Long sourceAccountId;
+    private Long targetAccountId;
 }

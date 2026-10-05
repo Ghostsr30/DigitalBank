@@ -2,18 +2,15 @@ package dev.luan.digitalbank.entities;
 
 import dev.luan.digitalbank.domain.TransactionType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "transaction")
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
 public class Transaction {
 
     @Id
@@ -34,4 +31,23 @@ public class Transaction {
     private Account targetAccount;
 
     private LocalDate createdAt;
+
+    private Transaction(TransactionType type, BigDecimal amount, Account sourceAccount, Account targetAccount) {
+        this.type = type;
+        this.amount = amount;
+        this.sourceAccount = sourceAccount;
+        this.targetAccount = targetAccount;
+    }
+
+    public static Transaction deposit(BigDecimal amount, Account sourceAccount, Account targetAccount) {
+        return new Transaction(TransactionType.DEPOSIT, amount, sourceAccount, targetAccount);
+    }
+
+    public static Transaction withdrawal(BigDecimal amount, Account sourceAccount, Account targetAccount) {
+        return new Transaction(TransactionType.WITHDRAW, amount, sourceAccount, targetAccount);
+    }
+
+    public static Transaction transfer(BigDecimal amount, Account sourceAccount, Account targetAccount) {
+        return new Transaction(TransactionType.TRANSFER, amount, sourceAccount, targetAccount);
+    }
 }
