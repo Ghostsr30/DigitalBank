@@ -43,6 +43,11 @@ public class AccountController {
         AccountDTO accountDTO = accountService.unblock(id);
         return ResponseEntity.ok().body(accountDTO);
     }
+    @PatchMapping("/{id}/closed")
+    public ResponseEntity<AccountDTO> closed(@PathVariable Long id){
+        AccountDTO accountDTO = accountService.closed(id);
+        return ResponseEntity.ok().body(accountDTO);
+    }
 
 
 }
