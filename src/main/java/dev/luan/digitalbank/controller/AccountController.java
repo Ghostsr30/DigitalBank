@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.math.BigDecimal;
 import java.net.URI;
 
 @Controller
@@ -46,6 +47,12 @@ public class AccountController {
     @PatchMapping("/{id}/closed")
     public ResponseEntity<AccountDTO> closed(@PathVariable Long id){
         AccountDTO accountDTO = accountService.closed(id);
+        return ResponseEntity.ok().body(accountDTO);
+    }
+
+    @PostMapping("/{id}/deposit")
+    public ResponseEntity<AccountDTO> deposit(@PathVariable Long id, @RequestBody BigDecimal amount){
+        AccountDTO accountDTO = accountService.deposit(id, amount);
         return ResponseEntity.ok().body(accountDTO);
     }
 
