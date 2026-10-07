@@ -38,5 +38,11 @@ public class AccountController {
         return ResponseEntity.ok().body(accountDTO);
     }
 
+    @PatchMapping("/{id}/unblock")
+    public ResponseEntity<AccountDTO> unblock(@PathVariable Long id){
+        AccountDTO accountDTO = accountService.unblock(id);
+        return ResponseEntity.ok().body(accountDTO);
+    }
+
 
 }
