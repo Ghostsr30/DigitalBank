@@ -56,5 +56,11 @@ public class AccountController {
         return ResponseEntity.ok().body(accountDTO);
     }
 
+    @PostMapping("/{id}/withdraw")
+    public ResponseEntity<AccountDTO> withdraw(@PathVariable Long id, @RequestBody BigDecimal amount){
+        AccountDTO accountDTO = accountService.withdraw(id, amount);
+        return ResponseEntity.ok().body(accountDTO);
+    }
+
 
 }
