@@ -2,9 +2,9 @@ package dev.luan.digitalbank.exceptions;
 
 import org.springframework.http.HttpStatus;
 
-public class InsufficientBalanceException extends BusinessException{
+public class AccountClosedException extends BusinessException{
 
-    public InsufficientBalanceException(String message) {
+    public AccountClosedException(String message) {
         super(message, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }

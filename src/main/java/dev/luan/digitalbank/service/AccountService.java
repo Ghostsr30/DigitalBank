@@ -3,10 +3,7 @@ package dev.luan.digitalbank.service;
 import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.entities.Account;
-import dev.luan.digitalbank.exceptions.AccountBlockedException;
-import dev.luan.digitalbank.exceptions.AccountNotFoundException;
-import dev.luan.digitalbank.exceptions.InsufficientBalanceException;
-import dev.luan.digitalbank.exceptions.InvalidAmountException;
+import dev.luan.digitalbank.exceptions.*;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,8 +86,12 @@ public class AccountService {
         if(amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidAmountException("Amount must be greater than zero");
         }
-        if(account.getStatus().equals(AccountStatus.BLOCKED) || account.getStatus().equals(AccountStatus.CLOSED)) {
+        if(account.getStatus().equals(AccountStatus.BLOCKED)) {
             throw new AccountBlockedException("Account is blocked");
+        }
+
+        if(account.getStatus().equals(AccountStatus.CLOSED)){
+            throw new AccountClosedException("Account is closed");
         }
         account.setBalance(account.getBalance().add(amount));
 
@@ -109,12 +110,15 @@ public class AccountService {
         if(amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Amount must be greater than zero");
         }
-        if(account.getStatus().equals(AccountStatus.BLOCKED) || account.getStatus().equals(AccountStatus.CLOSED)) {
+        if(account.getStatus().equals(AccountStatus.BLOCKED)) {
             throw new AccountBlockedException("Account is blocked");
+        }
+        if(account.getStatus().equals(AccountStatus.CLOSED)){
+            throw new AccountClosedException("Account is closed");
         }
 
         if (account.getBalance().compareTo(amount) < 0) {
-                throw new InsufficientBalanceException("Insufficient balance");
+            throw new InsufficientBalanceException("Insufficient balance");
         }
         account.setBalance(account.getBalance().subtract(amount));
 
