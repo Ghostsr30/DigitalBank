@@ -3,6 +3,7 @@ package dev.luan.digitalbank.service;
 import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.entities.Account;
+import dev.luan.digitalbank.exceptions.AccountBlockedException;
 import dev.luan.digitalbank.exceptions.AccountNotFoundException;
 import dev.luan.digitalbank.exceptions.InsufficientBalanceException;
 import dev.luan.digitalbank.exceptions.InvalidAmountException;
@@ -89,7 +90,7 @@ public class AccountService {
             throw new InvalidAmountException("Amount must be greater than zero");
         }
         if(account.getStatus().equals(AccountStatus.BLOCKED) || account.getStatus().equals(AccountStatus.CLOSED)) {
-            throw new RuntimeException("Account is blocked");
+            throw new AccountBlockedException("Account is blocked");
         }
         account.setBalance(account.getBalance().add(amount));
 
@@ -109,7 +110,7 @@ public class AccountService {
             throw new RuntimeException("Amount must be greater than zero");
         }
         if(account.getStatus().equals(AccountStatus.BLOCKED) || account.getStatus().equals(AccountStatus.CLOSED)) {
-            throw new RuntimeException("Account is blocked");
+            throw new AccountBlockedException("Account is blocked");
         }
 
         if (account.getBalance().compareTo(amount) < 0) {
