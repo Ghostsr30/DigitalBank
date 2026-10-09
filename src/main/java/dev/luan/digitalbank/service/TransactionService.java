@@ -5,6 +5,7 @@ import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.domain.TransactionType;
 import dev.luan.digitalbank.entities.Account;
 import dev.luan.digitalbank.entities.Transaction;
+import dev.luan.digitalbank.exceptions.AccountNotFoundException;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import dev.luan.digitalbank.repositories.TransactionRepository;
 import lombok.AccessLevel;
@@ -41,7 +42,7 @@ public class TransactionService {
     public List<TransactionDTO> extract(Long id){
 
         if(accountRepository.findById(id).isEmpty()) {
-            throw new RuntimeException("Account not found");
+            throw new AccountNotFoundException("Account not found");
         }
 
         return transactionRepository.findBySourceAccountIdOrTargetAccountIdOrderByCreatedAtDesc(id, id)

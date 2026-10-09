@@ -2,6 +2,9 @@ package dev.luan.digitalbank.service;
 
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.entities.Account;
+import dev.luan.digitalbank.exceptions.InsufficientBalanceException;
+import dev.luan.digitalbank.exceptions.InvalidAmountException;
+import dev.luan.digitalbank.exceptions.SameAccountTransferException;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +26,15 @@ public class TransferService {
     public void transfer(Long sourceId, Long targetId, BigDecimal amount) {
 
         if(amount == null){
-            throw new IllegalArgumentException("Amount must not be null");
+            throw new InvalidAmountException("Amount must not be null");
         }
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be greater than zero");
+            throw new InvalidAmountException("Amount must be greater than zero");
         }
 
         if (sourceId.equals(targetId)) {
-            throw new IllegalArgumentException("Source and target accounts must be different");
+            throw new SameAccountTransferException("Source and target accounts must be different");
         }
 
         Account sourceAccount = accountRepository.findById(sourceId)

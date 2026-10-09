@@ -58,21 +58,26 @@ public class AccountService {
 
     public AccountDTO block(Long id){
         Account account = findEntityById(id);
-        account.setStatus(AccountStatus.BLOCKED);                //arrumar
+        account.setStatus(AccountStatus.BLOCKED);
 
         return toDTO(accountRepository.save(account));
     }
 
     public AccountDTO unblock(Long id){
         Account account = findEntityById(id);
-        account.setStatus(AccountStatus.ACTIVE);         //arrumar
+        account.setStatus(AccountStatus.ACTIVE);
 
         return toDTO(accountRepository.save(account));
     }
 
     public AccountDTO closed(Long id){
         Account account = findEntityById(id);
-        account.setStatus(AccountStatus.CLOSED);                //arrumar
+
+        if(account.getBalance().compareTo(BigDecimal.ZERO) > 0) {
+            throw new AccountHasBalanceException("Account has balance");
+        }
+
+        account.setStatus(AccountStatus.CLOSED);
 
         return toDTO(accountRepository.save(account));
     }
