@@ -4,6 +4,7 @@ import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.entities.Account;
 import dev.luan.digitalbank.exceptions.AccountNotFoundException;
+import dev.luan.digitalbank.exceptions.InsufficientBalanceException;
 import dev.luan.digitalbank.exceptions.InvalidAmountException;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
@@ -112,7 +113,7 @@ public class AccountService {
         }
 
         if (account.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient balance");
+                throw new InsufficientBalanceException("Insufficient balance");
         }
         account.setBalance(account.getBalance().subtract(amount));
 
