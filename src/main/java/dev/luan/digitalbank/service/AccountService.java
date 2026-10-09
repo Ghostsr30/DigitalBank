@@ -58,6 +58,11 @@ public class AccountService {
 
     public AccountDTO block(Long id){
         Account account = findEntityById(id);
+
+        if(account.getStatus().equals(AccountStatus.CLOSED)) {
+            throw new AccountClosedException("Cannot block a closed account");
+        }
+
         account.setStatus(AccountStatus.BLOCKED);
 
         return toDTO(accountRepository.save(account));
@@ -65,6 +70,11 @@ public class AccountService {
 
     public AccountDTO unblock(Long id){
         Account account = findEntityById(id);
+
+        if(account.getStatus().equals(AccountStatus.CLOSED)) {
+            throw new AccountClosedException("Cannot unblock a closed account");
+        }
+
         account.setStatus(AccountStatus.ACTIVE);
 
         return toDTO(accountRepository.save(account));
@@ -75,6 +85,9 @@ public class AccountService {
 
         if(account.getBalance().compareTo(BigDecimal.ZERO) > 0) {
             throw new AccountHasBalanceException("Account has balance");
+        }
+        if(account.getStatus().equals(AccountStatus.CLOSED)) {
+            throw new AccountClosedException("Account is already closed");
         }
 
         account.setStatus(AccountStatus.CLOSED);
@@ -110,10 +123,10 @@ public class AccountService {
     public AccountDTO withdraw(Long id, BigDecimal amount) {
         Account account = findEntityById(id);
         if (amount == null){
-            throw  new RuntimeException("Amount cannot be null");
+            throw  new InvalidAmountException("Amount cannot be null");
         }
         if(amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Amount must be greater than zero");
+            throw new InvalidAmountException("Amount must be greater than zero");
         }
         if(account.getStatus().equals(AccountStatus.BLOCKED)) {
             throw new AccountBlockedException("Account is blocked");

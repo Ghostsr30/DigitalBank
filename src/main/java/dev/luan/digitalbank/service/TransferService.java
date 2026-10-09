@@ -2,9 +2,7 @@ package dev.luan.digitalbank.service;
 
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.entities.Account;
-import dev.luan.digitalbank.exceptions.InsufficientBalanceException;
-import dev.luan.digitalbank.exceptions.InvalidAmountException;
-import dev.luan.digitalbank.exceptions.SameAccountTransferException;
+import dev.luan.digitalbank.exceptions.*;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,25 +31,32 @@ public class TransferService {
             throw new InvalidAmountException("Amount must be greater than zero");
         }
 
-        if (sourceId.equals(targetId)) {
+        if (java.util.Objects.equals(sourceId, targetId)) {
             throw new SameAccountTransferException("Source and target accounts must be different");
         }
 
         Account sourceAccount = accountRepository.findById(sourceId)
-                .orElseThrow(() -> new IllegalArgumentException("Source account not found"));
+                .orElseThrow(() -> new AccountNotFoundException("Source account not found"));
         Account targetAccount = accountRepository.findById(targetId)
-                .orElseThrow(() -> new IllegalArgumentException("Target account not found"));
+                .orElseThrow(() -> new AccountNotFoundException("Target account not found"));
 
-        if(sourceAccount.getStatus().equals(AccountStatus.BLOCKED) || sourceAccount.getStatus().equals(AccountStatus.CLOSED)) {
-            throw new IllegalArgumentException("Source or target account is not active");
+        if(sourceAccount.getStatus().equals(AccountStatus.BLOCKED)) {
+            throw new AccountBlockedException("Source account is blocked");
         }
 
-        if(targetAccount.getStatus().equals(AccountStatus.BLOCKED) || targetAccount.getStatus().equals(AccountStatus.CLOSED)) {
-            throw new IllegalArgumentException("Source or target account is not active");
+        if (sourceAccount.getStatus().equals(AccountStatus.CLOSED)){
+            throw new AccountClosedException("Source account is closed");
+        }
+
+        if(targetAccount.getStatus().equals(AccountStatus.BLOCKED)) {
+            throw new AccountBlockedException("Target account is blocked");
+        }
+        if(targetAccount.getStatus().equals(AccountStatus.CLOSED)){
+            throw new AccountClosedException("Target account is closed");
         }
 
         if(sourceAccount.getBalance().compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Source account balance is not enough");
+            throw new InsufficientBalanceException("Source account balance is not enough");
         }
 
         sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
