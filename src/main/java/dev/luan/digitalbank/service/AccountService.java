@@ -3,6 +3,8 @@ package dev.luan.digitalbank.service;
 import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.entities.Account;
+import dev.luan.digitalbank.exceptions.AccountNotFoundException;
+import dev.luan.digitalbank.exceptions.InvalidAmountException;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,12 +48,13 @@ public class AccountService {
     }
 
     public AccountDTO findById(Long id) {
-        return toDTO(findEntityById(id));
+            return toDTO(findEntityById(id));
+
     }
 
     private Account findEntityById(Long id) {
         Optional<Account> obj = accountRepository.findById(id);
-        return obj.orElseThrow(() -> new RuntimeException("Account not found"));
+        return obj.orElseThrow(() -> new AccountNotFoundException("Account not found"));
     }
 
     public AccountDTO block(Long id){
@@ -79,10 +82,10 @@ public class AccountService {
     public AccountDTO deposit(Long id, BigDecimal amount) {
         Account account = findEntityById(id);
         if(amount == null) {
-            throw new RuntimeException("Amount cannot be null");
+            throw new InvalidAmountException("Amount cannot be null");
         }
         if(amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Amount must be greater than zero");
+            throw new InvalidAmountException("Amount must be greater than zero");
         }
         if(account.getStatus().equals(AccountStatus.BLOCKED) || account.getStatus().equals(AccountStatus.CLOSED)) {
             throw new RuntimeException("Account is blocked");
