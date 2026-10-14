@@ -64,4 +64,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+    @ExceptionHandler(AccountHasBalanceException.class)
+    public ResponseEntity<StandardError> AccountHasBalanceException(AccountHasBalanceException e, HttpServletRequest request) {
+        String error = "Account has balance";
+        HttpStatus status = HttpStatus.CONFLICT;
+        StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
 }
