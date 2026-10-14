@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transaction")
@@ -30,25 +30,25 @@ public class Transaction {
     @JoinColumn(name = "target_account_transaction")
     private Account targetAccount;
 
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
-    private Transaction(TransactionType type, BigDecimal amount, Account sourceAccount, Account targetAccount, LocalDate createdAt) {
+    private Transaction(TransactionType type, BigDecimal amount, Account sourceAccount, Account targetAccount, LocalDateTime createdAt) {
         this.type = type;
         this.amount = amount;
         this.sourceAccount = sourceAccount;
         this.targetAccount = targetAccount;
-        this.createdAt = LocalDate.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     public static Transaction deposit(BigDecimal amount, Account sourceAccount, Account targetAccount) {
-        return new Transaction(TransactionType.DEPOSIT, amount, targetAccount, sourceAccount, LocalDate.now());
+        return new Transaction(TransactionType.DEPOSIT, amount, targetAccount, sourceAccount, LocalDateTime.now());
     }
 
     public static Transaction withdrawal(BigDecimal amount, Account sourceAccount, Account targetAccount) {
-        return new Transaction(TransactionType.WITHDRAW, amount, sourceAccount, targetAccount, LocalDate.now());
+        return new Transaction(TransactionType.WITHDRAW, amount, sourceAccount, targetAccount, LocalDateTime.now());
     }
 
     public static Transaction transfer(BigDecimal amount, Account sourceAccount, Account targetAccount) {
-        return new Transaction(TransactionType.TRANSFER, amount, sourceAccount, targetAccount, LocalDate.now());
+        return new Transaction(TransactionType.TRANSFER, amount, sourceAccount, targetAccount, LocalDateTime.now());
     }
 }
