@@ -32,4 +32,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<StandardError> InsufficientBalanceException(InsufficientBalanceException e, HttpServletRequest request) {
+        String error = "Insufficient balance";
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
 }
