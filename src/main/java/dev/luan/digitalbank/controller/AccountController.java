@@ -10,7 +10,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.math.BigDecimal;
 import java.net.URI;
 
-@Controller
+@RestController
 @RequestMapping("/accounts")
 public class AccountController {
 
