@@ -40,4 +40,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+    @ExceptionHandler(AccountBlockedException.class)
+    public ResponseEntity<StandardError> AccountBlockedException(AccountBlockedException e, HttpServletRequest request) {
+        String error = "Account blocked";
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
 }
