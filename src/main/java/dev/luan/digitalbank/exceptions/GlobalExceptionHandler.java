@@ -48,4 +48,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+    @ExceptionHandler(AccountClosedException.class)
+    public ResponseEntity<StandardError> AccountClosedException(AccountClosedException e, HttpServletRequest request) {
+        String error = "Account closed";
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(SameAccountTransferException.class)
+    public ResponseEntity<StandardError> SameAccountTransferException(SameAccountTransferException e, HttpServletRequest request) {
+        String error = "Same account transfer";
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
 }
