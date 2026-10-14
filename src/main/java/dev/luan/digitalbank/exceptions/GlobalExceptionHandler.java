@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccountNotFoundException.class)
-    public ResponseEntity<StandardError> AccountNotFoundException(AccountNotFoundException e, HttpServletRequest request) {
+    public ResponseEntity<StandardError> accountNotFoundException(AccountNotFoundException e, HttpServletRequest request) {
         String error = "Resource not found";
         HttpStatus status = HttpStatus.NOT_FOUND;
         StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidAmountException.class)
-    public ResponseEntity<StandardError> InvalidAmountException(InvalidAmountException e, HttpServletRequest request) {
+    public ResponseEntity<StandardError> invalidAmountException(InvalidAmountException e, HttpServletRequest request) {
         String error = "Invalid amount";
         HttpStatus status = HttpStatus.BAD_REQUEST;
         StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InsufficientBalanceException.class)
-    public ResponseEntity<StandardError> InsufficientBalanceException(InsufficientBalanceException e, HttpServletRequest request) {
+    public ResponseEntity<StandardError> insufficientBalanceException(InsufficientBalanceException e, HttpServletRequest request) {
         String error = "Insufficient balance";
         HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
         StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccountBlockedException.class)
-    public ResponseEntity<StandardError> AccountBlockedException(AccountBlockedException e, HttpServletRequest request) {
+    public ResponseEntity<StandardError> accountBlockedException(AccountBlockedException e, HttpServletRequest request) {
         String error = "Account blocked";
         HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
         StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccountClosedException.class)
-    public ResponseEntity<StandardError> AccountClosedException(AccountClosedException e, HttpServletRequest request) {
+    public ResponseEntity<StandardError> accountClosedException(AccountClosedException e, HttpServletRequest request) {
         String error = "Account closed";
         HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
         StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(SameAccountTransferException.class)
-    public ResponseEntity<StandardError> SameAccountTransferException(SameAccountTransferException e, HttpServletRequest request) {
+    public ResponseEntity<StandardError> sameAccountTransferException(SameAccountTransferException e, HttpServletRequest request) {
         String error = "Same account transfer";
         HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
         StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
@@ -65,7 +65,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccountHasBalanceException.class)
-    public ResponseEntity<StandardError> AccountHasBalanceException(AccountHasBalanceException e, HttpServletRequest request) {
+    public ResponseEntity<StandardError> accountHasBalanceException(AccountHasBalanceException e, HttpServletRequest request) {
         String error = "Account has balance";
         HttpStatus status = HttpStatus.CONFLICT;
         StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
