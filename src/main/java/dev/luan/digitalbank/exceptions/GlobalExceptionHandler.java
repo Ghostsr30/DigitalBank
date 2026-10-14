@@ -24,4 +24,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+    @ExceptionHandler(InvalidAmountException.class)
+    public ResponseEntity<StandardError> InvalidAmountException(InvalidAmountException e, HttpServletRequest request) {
+        String error = "Invalid amount";
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
 }
