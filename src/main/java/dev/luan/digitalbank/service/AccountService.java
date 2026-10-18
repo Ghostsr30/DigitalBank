@@ -43,6 +43,7 @@ public class AccountService {
 
         Account savedAccount = accountRepository.save(account);
 
+        account.setBalance(BigDecimal.ZERO);
         return toDTO(savedAccount);
     }
 

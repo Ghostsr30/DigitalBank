@@ -2,6 +2,7 @@ package dev.luan.digitalbank.controller;
 
 import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class AccountController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO dto) {
+    public ResponseEntity<AccountDTO> createAccount(@Valid @RequestBody AccountDTO dto) {
         AccountDTO createdAccount = accountService.createAccount(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdAccount.getId()).toUri();
         return ResponseEntity.created(uri).body(createdAccount);

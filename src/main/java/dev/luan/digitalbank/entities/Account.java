@@ -2,6 +2,7 @@ package dev.luan.digitalbank.entities;
 
 import dev.luan.digitalbank.domain.AccountStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
