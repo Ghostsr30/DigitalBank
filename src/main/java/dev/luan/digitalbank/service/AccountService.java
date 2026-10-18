@@ -38,12 +38,12 @@ public class AccountService {
         account.setDocument(accountDTO.getDocument());
         account.setHolderName(accountDTO.getHolderName());
         account.setAccountNumber(accountDTO.getAccountNumber());
-        account.setBalance(accountDTO.getBalance());
+        account.setBalance(BigDecimal.ZERO);
         account.setStatus(AccountStatus.ACTIVE);
 
         Account savedAccount = accountRepository.save(account);
 
-        account.setBalance(BigDecimal.ZERO);
+
         return toDTO(savedAccount);
     }
 
