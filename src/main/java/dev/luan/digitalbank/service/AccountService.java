@@ -7,6 +7,7 @@ import dev.luan.digitalbank.exceptions.*;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.util.Optional;
