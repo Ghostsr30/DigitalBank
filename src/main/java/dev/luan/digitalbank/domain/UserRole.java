@@ -3,7 +3,7 @@ package dev.luan.digitalbank.domain;
 public enum UserRole {
 
     ADMIN("admin"),
-    USER("user");;
+    USER("user");
 
     private String role;
 
