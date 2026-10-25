@@ -29,6 +29,14 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST,"/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST,"/auth/login").permitAll()
+
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+
+                        .requestMatchers(HttpMethod.PATCH, "/accounts/*/closed").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/accounts/*/unblock").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/accounts/*/block").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
