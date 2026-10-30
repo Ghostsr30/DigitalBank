@@ -1,13 +1,18 @@
 package dev.luan.digitalbank.service;
 
 import dev.luan.digitalbank.domain.AccountStatus;
+import dev.luan.digitalbank.domain.UserRole;
 import dev.luan.digitalbank.entities.Account;
+import dev.luan.digitalbank.entities.User;
 import dev.luan.digitalbank.exceptions.*;
 import dev.luan.digitalbank.repositories.AccountRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.rmi.AccessException;
 
 @Service
 public class TransferService {
@@ -22,6 +27,9 @@ public class TransferService {
 
     @Transactional
     public void transfer(Long sourceId, Long targetId, BigDecimal amount) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
         if(amount == null){
             throw new InvalidAmountException("Amount must not be null");
@@ -39,6 +47,12 @@ public class TransferService {
                 .orElseThrow(() -> new AccountNotFoundException("Source account not found"));
         Account targetAccount = accountRepository.findById(targetId)
                 .orElseThrow(() -> new AccountNotFoundException("Target account not found"));
+
+        if(sourceAccount.getUser() == null || !sourceAccount.getUser().getId().equals(user.getId())) {
+            if(!user.getRole().equals(UserRole.ADMIN)) {
+                throw new AcessDeniedException("You can only transfer from your own account!");
+            }
+        }
 
         if(sourceAccount.getStatus().equals(AccountStatus.BLOCKED)) {
             throw new AccountBlockedException("Source account is blocked");

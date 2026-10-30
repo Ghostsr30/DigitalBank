@@ -2,13 +2,15 @@ package dev.luan.digitalbank.service;
 
 import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
+import dev.luan.digitalbank.domain.UserRole;
 import dev.luan.digitalbank.entities.Account;
+import dev.luan.digitalbank.entities.User;
 import dev.luan.digitalbank.exceptions.*;
 import dev.luan.digitalbank.repositories.AccountRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -35,6 +37,8 @@ public class AccountService {
     }
 
     public AccountDTO createAccount(AccountDTO accountDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
         Account account = new Account();
         account.setDocument(accountDTO.getDocument());
         account.setHolderName(accountDTO.getHolderName());
@@ -42,6 +46,7 @@ public class AccountService {
         account.setBalance(BigDecimal.ZERO);
         account.setStatus(AccountStatus.ACTIVE);
 
+        account.setUser(user);
         Account savedAccount = accountRepository.save(account);
 
 
@@ -49,6 +54,9 @@ public class AccountService {
     }
 
     public AccountDTO findById(Long id) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException("Account not found!"));
+        validateAccountOwnership(account);
+
             return toDTO(findEntityById(id));
 
     }
@@ -100,6 +108,8 @@ public class AccountService {
     @Transactional
     public AccountDTO deposit(Long id, BigDecimal amount) {
         Account account = findEntityById(id);
+        validateAccountOwnership(account);
+
         if(amount == null) {
             throw new InvalidAmountException("Amount cannot be null");
         }
@@ -124,6 +134,9 @@ public class AccountService {
     @Transactional
     public AccountDTO withdraw(Long id, BigDecimal amount) {
         Account account = findEntityById(id);
+        validateAccountOwnership(account);
+
+
         if (amount == null){
             throw  new InvalidAmountException("Amount cannot be null");
         }
@@ -145,5 +158,20 @@ public class AccountService {
         transactionService.registerWithdrawal(id, amount, account);
 
         return toDTO(accountRepository.save(account));
+    }
+
+    public void validateAccountOwnership(Account account) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        if(account.getUser() == null ||  !account.getUser().getId().equals(user.getId())) {
+            if(account.getStatus().equals(AccountStatus.CLOSED)) {
+                throw new AccountClosedException("Account is already closed");
+            }
+            if(!user.getRole().equals(UserRole.ADMIN)) {
+                throw new AcessDeniedException("You do not have permission to operate this account!");
+            }
+        }
+
     }
 }

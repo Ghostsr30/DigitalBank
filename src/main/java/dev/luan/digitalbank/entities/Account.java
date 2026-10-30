@@ -32,4 +32,8 @@ public class Account {
 
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

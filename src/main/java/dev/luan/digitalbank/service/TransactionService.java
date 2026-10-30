@@ -2,14 +2,18 @@ package dev.luan.digitalbank.service;
 
 import dev.luan.digitalbank.DTO.TransactionDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
-import dev.luan.digitalbank.domain.TransactionType;
+import dev.luan.digitalbank.domain.UserRole;
 import dev.luan.digitalbank.entities.Account;
 import dev.luan.digitalbank.entities.Transaction;
+import dev.luan.digitalbank.entities.User;
+import dev.luan.digitalbank.exceptions.AccountClosedException;
 import dev.luan.digitalbank.exceptions.AccountNotFoundException;
+import dev.luan.digitalbank.exceptions.AcessDeniedException;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import dev.luan.digitalbank.repositories.TransactionRepository;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +45,11 @@ public class TransactionService {
     @Transactional(readOnly = true)
     public List<TransactionDTO> extract(Long id){
 
+        Account account = accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException("Account not found!"));
+
+        validateAccountOwnership(account);
+
+
         if(accountRepository.findById(id).isEmpty()) {
             throw new AccountNotFoundException("Account not found");
         }
@@ -64,6 +73,21 @@ public class TransactionService {
     public void registerTransfer(BigDecimal amount, Account sourceAccount, Account targetAccount){
         Transaction transaction = Transaction.transfer(amount, sourceAccount, targetAccount);
         transactionRepository.save(transaction);
+    }
+
+    public void validateAccountOwnership(Account account) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        if(account.getUser() == null ||  !account.getUser().getId().equals(user.getId())) {
+            if(account.getStatus().equals(AccountStatus.CLOSED)) {
+                throw new AccountClosedException("Account is already closed");
+            }
+            if(!user.getRole().equals(UserRole.ADMIN)) {
+                throw new AcessDeniedException("You do not have permission to operate this account!");
+            }
+        }
+
     }
 
 }

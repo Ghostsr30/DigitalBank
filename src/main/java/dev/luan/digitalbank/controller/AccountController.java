@@ -1,10 +1,18 @@
 package dev.luan.digitalbank.controller;
 
 import dev.luan.digitalbank.DTO.AccountDTO;
+import dev.luan.digitalbank.DTO.userDTO.AuthenticationDTO;
+import dev.luan.digitalbank.entities.User;
+import dev.luan.digitalbank.repositories.UserRepository;
 import dev.luan.digitalbank.service.AccountService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
