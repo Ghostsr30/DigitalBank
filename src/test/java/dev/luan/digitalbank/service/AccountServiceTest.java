@@ -134,4 +134,26 @@ public class AccountServiceTest {
         });
     }
 
+    @Test
+    void withdrawalVerify(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(100));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+
+        when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
+        );
+
+        accountService.withdraw(1L, new BigDecimal(50));
+
+        Assertions.assertEquals(new BigDecimal(50), account.getBalance());
+
+    }
+
 }
