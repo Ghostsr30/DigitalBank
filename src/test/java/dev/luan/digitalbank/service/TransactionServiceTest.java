@@ -17,6 +17,17 @@ public class TransactionServiceTest {
         Transaction transaction = Transaction.deposit(amount, account, null);
 
         Assertions.assertEquals(transaction.getAmount(), amount);
-
     }
+
+    @Test
+    void registerWithdrawal(){
+        Account account = new Account();
+
+        BigDecimal amount = new BigDecimal("100");
+        Transaction transaction = Transaction.withdrawal(amount, account, null);
+
+        Assertions.assertEquals(transaction.getAmount(), amount);
+    }
+
+
 }

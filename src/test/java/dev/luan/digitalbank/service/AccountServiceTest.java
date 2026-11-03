@@ -1,4 +1,4 @@
-package dev.luan.digitalbank;
+package dev.luan.digitalbank.service;
 
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.domain.UserRole;
@@ -8,8 +8,6 @@ import dev.luan.digitalbank.exceptions.AccountBlockedException;
 import dev.luan.digitalbank.exceptions.AccountClosedException;
 import dev.luan.digitalbank.exceptions.InvalidAmountException;
 import dev.luan.digitalbank.repositories.AccountRepository;
-import dev.luan.digitalbank.service.AccountService;
-import dev.luan.digitalbank.service.TransactionService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
