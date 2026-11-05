@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -400,5 +401,30 @@ public class AccountServiceTest {
         Assertions.assertThrows(AccountNotFoundException.class, () -> {
             accountService.findById(1L);
         });
+    }
+
+    @Test
+    void createAccountVerify(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setDocument("1234");
+        account.setHolderName("luanVedovoto");
+        account.setAccountNumber(5435435L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setDocument("1234");
+        accountDTO.setHolderName("luanVedovoto");
+        accountDTO.setAccountNumber(5435435L);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, null)
+        );
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
+
+        AccountDTO dto = accountService.createAccount(accountDTO);
+
+        Assertions.assertEquals(account.getHolderName(), dto.getHolderName());
     }
 }
