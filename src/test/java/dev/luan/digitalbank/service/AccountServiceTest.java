@@ -6,6 +6,7 @@ import dev.luan.digitalbank.entities.Account;
 import dev.luan.digitalbank.entities.User;
 import dev.luan.digitalbank.exceptions.AccountBlockedException;
 import dev.luan.digitalbank.exceptions.AccountClosedException;
+import dev.luan.digitalbank.exceptions.InsufficientBalanceException;
 import dev.luan.digitalbank.exceptions.InvalidAmountException;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.junit.jupiter.api.Assertions;
@@ -153,7 +154,116 @@ public class AccountServiceTest {
         accountService.withdraw(1L, new BigDecimal(50));
 
         Assertions.assertEquals(new BigDecimal(50), account.getBalance());
-
     }
+
+    @Test
+    void withdrawalInvalidAmountExceptionNull(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(100));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
+        );
+
+        Assertions.assertThrows(InvalidAmountException.class, () -> {
+            accountService.withdraw(1L, null);
+        });
+    }
+
+    @Test
+    void withdrawalInvalidAmountException(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(100));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
+        );
+
+        Assertions.assertThrows(InvalidAmountException.class, () -> {
+            accountService.withdraw(1L, new BigDecimal(0));
+        });
+    }
+
+    @Test
+    void withdrawalAccountBlockedException(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(100));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+
+        when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
+        );
+
+        accountService.block(1L);
+
+        Assertions.assertThrows(AccountBlockedException.class, () -> {
+            accountService.withdraw(1L, new BigDecimal(50));
+        });
+    }
+
+    @Test
+    void withdrawalAccountClosedException(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+
+        when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
+        );
+
+        accountService.closed(1L);
+
+        Assertions.assertThrows(AccountClosedException.class, () -> {
+            accountService.withdraw(1L, new BigDecimal(50));
+        });
+    }
+
+    @Test
+    void withdrawalInsufficientBalanceException(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
+        );
+
+        Assertions.assertThrows(InsufficientBalanceException.class, () -> {
+            accountService.withdraw(1L, new BigDecimal(100));
+        });
+    }
+
+
+
+
 
 }
