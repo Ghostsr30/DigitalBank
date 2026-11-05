@@ -1,5 +1,6 @@
 package dev.luan.digitalbank.service;
 
+import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.domain.UserRole;
 import dev.luan.digitalbank.entities.Account;
@@ -358,6 +359,46 @@ public class AccountServiceTest {
 
         Assertions.assertThrows(AccountClosedException.class, () -> {
             accountService.unblock(1L);
+        });
+    }
+
+    @Test
+    void findById(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, null)
+        );
+
+        AccountDTO accountDTO = accountService.findById(1L);
+
+        Assertions.assertEquals(account.getId(), accountDTO.getId());
+    }
+
+    @Test
+    void findByIdException(){
+        User user = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setUser(user);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.empty());
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, null)
+        );
+
+        Assertions.assertThrows(AccountNotFoundException.class, () -> {
+            accountService.findById(1L);
         });
     }
 }
