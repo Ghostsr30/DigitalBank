@@ -4,10 +4,7 @@ import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.domain.UserRole;
 import dev.luan.digitalbank.entities.Account;
 import dev.luan.digitalbank.entities.User;
-import dev.luan.digitalbank.exceptions.AccountBlockedException;
-import dev.luan.digitalbank.exceptions.AccountClosedException;
-import dev.luan.digitalbank.exceptions.InsufficientBalanceException;
-import dev.luan.digitalbank.exceptions.InvalidAmountException;
+import dev.luan.digitalbank.exceptions.*;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -262,6 +259,49 @@ public class AccountServiceTest {
         });
     }
 
+    @Test
+    void closedVerify(){
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        accountService.closed(1L);
+
+        Assertions.assertEquals(AccountStatus.CLOSED, account.getStatus());
+    }
+
+    @Test
+    void closedBalanceException(){
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(100));
+        account.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+
+        Assertions.assertThrows(AccountHasBalanceException.class, () -> {
+            accountService.closed(1L);
+        });
+    }
+
+    @Test
+    void AccountClosedException(){
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.CLOSED);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        Assertions.assertThrows(AccountClosedException.class, () -> {
+            accountService.closed(1L);
+        });
+    }
 
 
 
