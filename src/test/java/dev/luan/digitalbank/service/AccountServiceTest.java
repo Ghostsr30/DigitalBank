@@ -290,7 +290,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    void AccountClosedException(){
+    void accountClosedException(){
         Account account = new Account();
         account.setId(1L);
         account.setBalance(new BigDecimal(0));
@@ -303,7 +303,32 @@ public class AccountServiceTest {
         });
     }
 
+    @Test
+    void blockedAccount(){
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.ACTIVE);
 
+        when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
 
+        accountService.block(1L);
 
+        Assertions.assertEquals(AccountStatus.BLOCKED, account.getStatus());
+    }
+
+    @Test
+    void blockAccountClosedException(){
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.CLOSED);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        Assertions.assertThrows(AccountClosedException.class, () -> {
+            accountService.block(1L);
+        });
+    }
 }
