@@ -331,4 +331,33 @@ public class AccountServiceTest {
             accountService.block(1L);
         });
     }
+
+    @Test
+    void unblockAccount(){
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.BLOCKED);
+
+        when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        accountService.unblock(1L);
+
+        Assertions.assertEquals(AccountStatus.ACTIVE, account.getStatus());
+    }
+
+    @Test
+    void unblockAccountClosedException(){
+        Account account = new Account();
+        account.setId(1L);
+        account.setBalance(new BigDecimal(0));
+        account.setStatus(AccountStatus.CLOSED);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        Assertions.assertThrows(AccountClosedException.class, () -> {
+            accountService.unblock(1L);
+        });
+    }
 }
