@@ -5,6 +5,7 @@ import dev.luan.digitalbank.domain.UserRole;
 import dev.luan.digitalbank.entities.Account;
 import dev.luan.digitalbank.entities.User;
 import dev.luan.digitalbank.exceptions.InvalidAmountException;
+import dev.luan.digitalbank.exceptions.SameAccountTransferException;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -109,6 +110,22 @@ public class TransferServiceTest {
         });
     }
 
+    @Test
+    void transferEqualsId(){
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(100));
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setUser(user1);
 
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        Assertions.assertThrows(SameAccountTransferException.class, ()->{
+           transferService.transfer(1L, 1L, new BigDecimal(50));
+        });
+    }
 
 }
