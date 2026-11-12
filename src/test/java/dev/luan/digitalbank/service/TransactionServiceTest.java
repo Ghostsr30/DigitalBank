@@ -5,6 +5,7 @@ import dev.luan.digitalbank.domain.UserRole;
 import dev.luan.digitalbank.entities.Account;
 import dev.luan.digitalbank.entities.Transaction;
 import dev.luan.digitalbank.entities.User;
+import dev.luan.digitalbank.exceptions.AccountNotFoundException;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import dev.luan.digitalbank.repositories.TransactionRepository;
 import org.junit.jupiter.api.Assertions;
@@ -83,6 +84,12 @@ public class TransactionServiceTest {
         transactionService.extract(1L);
 
         verify(transactionRepository, times(1)).findBySourceAccountIdOrTargetAccountIdOrderByCreatedAtDesc(1L, 1L);
+    }
 
+    @Test
+    void extractAccountNotFoundException(){
+        Assertions.assertThrows(AccountNotFoundException.class, () -> {
+            transactionService.extract(1L);
+        });
     }
 }
