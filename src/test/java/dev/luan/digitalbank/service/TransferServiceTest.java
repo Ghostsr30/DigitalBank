@@ -4,8 +4,7 @@ import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.domain.UserRole;
 import dev.luan.digitalbank.entities.Account;
 import dev.luan.digitalbank.entities.User;
-import dev.luan.digitalbank.exceptions.InvalidAmountException;
-import dev.luan.digitalbank.exceptions.SameAccountTransferException;
+import dev.luan.digitalbank.exceptions.*;
 import dev.luan.digitalbank.repositories.AccountRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ public class TransferServiceTest {
     private AccountRepository accountRepository;
 
     @Test
-    void transferVerify(){
+    void transferVerify() {
         User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
         Account account1 = new Account();
         account1.setId(1L);
@@ -61,11 +60,11 @@ public class TransferServiceTest {
 
         Assertions.assertEquals(new BigDecimal(100), account2.getBalance());
         verify(transactionService, times(1))
-                .registerTransfer(new BigDecimal(100),account1,account2);
+                .registerTransfer(new BigDecimal(100), account1, account2);
     }
 
     @Test
-    void transferNullAmount(){
+    void transferNullAmount() {
         User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
         Account account1 = new Account();
         account1.setId(1L);
@@ -83,12 +82,12 @@ public class TransferServiceTest {
         );
 
         Assertions.assertThrows(InvalidAmountException.class, () -> {
-            transferService.transfer(1L,2L, null);
+            transferService.transfer(1L, 2L, null);
         });
     }
 
     @Test
-    void transferAmountIsZero(){
+    void transferAmountIsZero() {
         User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
         Account account1 = new Account();
         account1.setId(1L);
@@ -106,12 +105,12 @@ public class TransferServiceTest {
         );
 
         Assertions.assertThrows(InvalidAmountException.class, () -> {
-            transferService.transfer(1L,2L, new BigDecimal(0));
+            transferService.transfer(1L, 2L, new BigDecimal(0));
         });
     }
 
     @Test
-    void transferEqualsId(){
+    void transferEqualsId() {
         User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
         Account account1 = new Account();
         account1.setId(1L);
@@ -123,9 +122,225 @@ public class TransferServiceTest {
                 new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
         );
 
-        Assertions.assertThrows(SameAccountTransferException.class, ()->{
-           transferService.transfer(1L, 1L, new BigDecimal(50));
+        Assertions.assertThrows(SameAccountTransferException.class, () -> {
+            transferService.transfer(1L, 1L, new BigDecimal(50));
         });
     }
 
+    @Test
+    void transferSourceAccountNotFoundException() {
+
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(100));
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setUser(user1);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        Assertions.assertThrows(AccountNotFoundException.class, () -> {
+            transferService.transfer(3L, 2L, new BigDecimal(50));
+        });
+    }
+
+    @Test
+    void transferTargetAccountNotFoundException() {
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(100));
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setUser(user1);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        Assertions.assertThrows(AccountNotFoundException.class, () -> {
+            transferService.transfer(1L, 2L, new BigDecimal(50));
+        });
+    }
+    @Test
+    void transferAcessDeniedException(){
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(100));
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setUser(user1);
+
+        Account account2 = new Account();
+        account2.setId(2L);
+        account2.setBalance(new BigDecimal(0));
+        account2.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account1));
+        when(accountRepository.findById(2L)).thenReturn(Optional.of(account2));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        Assertions.assertThrows(AcessDeniedException.class, ()-> {
+           transferService.transfer(2L, 1L, new BigDecimal(50));
+        });
+    }
+    @Test
+    void transferAdminAcess(){
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.ADMIN);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(0));
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setUser(user1);
+
+        Account account2 = new Account();
+        account2.setId(2L);
+        account2.setBalance(new BigDecimal(100));
+        account2.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account1));
+        when(accountRepository.findById(2L)).thenReturn(Optional.of(account2));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        transferService.transfer(2L, 1L, new BigDecimal(50));
+
+        Assertions.assertEquals(new BigDecimal(50), account1.getBalance());
+    }
+    @Test
+    void transferSourceAccountBlockedException(){
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(0));
+        account1.setStatus(AccountStatus.BLOCKED);
+        account1.setUser(user1);
+
+        Account account2 = new Account();
+        account2.setId(2L);
+        account2.setBalance(new BigDecimal(100));
+        account2.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account1));
+        when(accountRepository.findById(2L)).thenReturn(Optional.of(account2));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        Assertions.assertThrows(AccountBlockedException.class, () -> {
+           transferService.transfer(1L, 2L, new BigDecimal(50));
+        });
+    }
+
+    @Test
+    void transferSourceAccountClosedException(){
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(0));
+        account1.setStatus(AccountStatus.CLOSED);
+        account1.setUser(user1);
+
+        Account account2 = new Account();
+        account2.setId(2L);
+        account2.setBalance(new BigDecimal(100));
+        account2.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account1));
+        when(accountRepository.findById(2L)).thenReturn(Optional.of(account2));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        Assertions.assertThrows(AccountClosedException.class, () -> {
+            transferService.transfer(1L, 2L, new BigDecimal(50));
+        });
+    }
+
+    @Test
+    void transferTargetAccountBlockedException(){
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(0));
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setUser(user1);
+
+        Account account2 = new Account();
+        account2.setId(2L);
+        account2.setBalance(new BigDecimal(100));
+        account2.setStatus(AccountStatus.BLOCKED);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account1));
+        when(accountRepository.findById(2L)).thenReturn(Optional.of(account2));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        Assertions.assertThrows(AccountBlockedException.class, () -> {
+            transferService.transfer(1L, 2L, new BigDecimal(50));
+        });
+    }
+
+    @Test
+    void transferTargetAccountClosedException(){
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(0));
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setUser(user1);
+
+        Account account2 = new Account();
+        account2.setId(2L);
+        account2.setBalance(new BigDecimal(100));
+        account2.setStatus(AccountStatus.CLOSED);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account1));
+        when(accountRepository.findById(2L)).thenReturn(Optional.of(account2));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        Assertions.assertThrows(AccountClosedException.class, () -> {
+            transferService.transfer(1L, 2L, new BigDecimal(50));
+        });
+    }
+
+    @Test
+    void transferBalanceNotEnough(){
+        User user1 = new User(1L, "luan@gmail.com", "1234", UserRole.USER);
+        Account account1 = new Account();
+        account1.setId(1L);
+        account1.setBalance(new BigDecimal(0));
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setUser(user1);
+
+        Account account2 = new Account();
+        account2.setId(2L);
+        account2.setBalance(new BigDecimal(0));
+        account2.setStatus(AccountStatus.ACTIVE);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities())
+        );
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account1));
+        when(accountRepository.findById(2L)).thenReturn(Optional.of(account2));
+
+        Assertions.assertThrows(InsufficientBalanceException.class, ()-> {
+            transferService.transfer(1L, 2L, new BigDecimal(50));
+        });
+    }
 }
+
