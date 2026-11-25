@@ -3,7 +3,6 @@ package dev.luan.digitalbank.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
-import dev.luan.digitalbank.repositories.AccountRepository;
 import dev.luan.digitalbank.service.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
