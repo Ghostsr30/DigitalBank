@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,15 +35,21 @@ public class AccountControllerTest {
 
     private MockMvc mockMvc;
 
+    private BigDecimal amount;
+
+    private Long accountId;
+
     @BeforeEach
     void setUp(){
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        amount = new BigDecimal(50.00);
+        accountId = 1L;
     }
+
 
     @Test
     void findById() throws Exception {
 
-        Long accountId = 1L;
         AccountDTO dto = new AccountDTO();
         dto.setId(accountId);
         dto.setHolderName("Luan Vedovoto");
@@ -65,7 +72,6 @@ public class AccountControllerTest {
     @Test
     void createAccount() throws Exception {
 
-        Long accountId = 1L;
         AccountDTO dto = new AccountDTO();
         dto.setId(accountId);
         dto.setHolderName("Luan Vedovoto");
@@ -90,7 +96,6 @@ public class AccountControllerTest {
     @Test
     void blockAccount() throws Exception {
 
-        Long accountId = 1L;
         AccountDTO dto = new AccountDTO();
         dto.setId(accountId);
         dto.setHolderName("Luan Vedovoto");
@@ -110,7 +115,6 @@ public class AccountControllerTest {
     @Test
     void unblockAccount() throws Exception {
 
-        Long accountId = 1L;
         AccountDTO dto = new AccountDTO();
         dto.setId(accountId);
         dto.setHolderName("Luan Vedovoto");
@@ -130,7 +134,6 @@ public class AccountControllerTest {
     @Test
     void closeAccount() throws Exception {
 
-        Long accountId = 1L;
         AccountDTO dto = new AccountDTO();
         dto.setId(accountId);
         dto.setHolderName("Luan Vedovoto");
@@ -146,4 +149,25 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.status").value("CLOSED"));
     }
 
+    @Test
+    void depositAccount() throws Exception {
+
+        AccountDTO dto = new AccountDTO();
+        dto.setId(accountId);
+        dto.setStatus(AccountStatus.ACTIVE);
+        dto.setBalance(amount);
+
+        when(accountService.deposit(eq(accountId), any(BigDecimal.class))).thenReturn(dto);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(amount);
+
+        mockMvc.perform(post("/accounts/{id}/deposit", accountId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(accountId))
+                .andExpect(jsonPath("$.balance").value(50.00));
+
+    }
 }
