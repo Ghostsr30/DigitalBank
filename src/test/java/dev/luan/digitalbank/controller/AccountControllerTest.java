@@ -1,5 +1,6 @@
 package dev.luan.digitalbank.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.luan.digitalbank.DTO.AccountDTO;
 import dev.luan.digitalbank.domain.AccountStatus;
 import dev.luan.digitalbank.repositories.AccountRepository;
@@ -16,8 +17,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,7 +63,30 @@ public class AccountControllerTest {
 
     }
 
+    @Test
+    void createAccount() throws Exception {
 
+        Long accountId = 1L;
+        AccountDTO dto = new AccountDTO();
+        dto.setId(accountId);
+        dto.setHolderName("Luan Vedovoto");
+        dto.setAccountNumber(432432432L);
+        dto.setStatus(AccountStatus.ACTIVE);
+        dto.setDocument("54354354");
+
+        when(accountService.createAccount(any(AccountDTO.class))).thenReturn(dto);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/accounts/create")
+            .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(accountId))
+                .andExpect(jsonPath("$.holderName").value("Luan Vedovoto"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
 
 
 }
