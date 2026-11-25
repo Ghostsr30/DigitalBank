@@ -170,4 +170,25 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.balance").value(50.00));
 
     }
+
+    @Test
+    void withdrawAccount() throws Exception {
+
+        AccountDTO dto = new AccountDTO();
+        dto.setId(accountId);
+        dto.setStatus(AccountStatus.ACTIVE);
+        dto.setBalance(new BigDecimal(50));
+
+        when(accountService.withdraw(eq(accountId), any(BigDecimal.class))).thenReturn(dto);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(amount);
+
+        mockMvc.perform(post("/accounts/{id}/withdraw", accountId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(accountId))
+                .andExpect(jsonPath("$.balance").value(50));
+    }
 }
