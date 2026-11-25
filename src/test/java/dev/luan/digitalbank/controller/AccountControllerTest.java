@@ -19,8 +19,7 @@ import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -86,6 +85,26 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.id").value(accountId))
                 .andExpect(jsonPath("$.holderName").value("Luan Vedovoto"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
+
+    @Test
+    void blockAccount() throws Exception {
+
+        Long accountId = 1L;
+        AccountDTO dto = new AccountDTO();
+        dto.setId(accountId);
+        dto.setHolderName("Luan Vedovoto");
+        dto.setAccountNumber(432432432L);
+        dto.setStatus(AccountStatus.BLOCKED);
+        dto.setDocument("54354354");
+
+        when(accountService.block(accountId)).thenReturn(dto);
+
+        mockMvc.perform(patch("/accounts/{id}/block", accountId)
+        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(accountId))
+                .andExpect(jsonPath("$.status").value("BLOCKED"));
     }
 
 
